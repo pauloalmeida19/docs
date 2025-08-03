@@ -1,1117 +1,1117 @@
 {
-"openapi": "3.1.0",
-"info": {
-"title": "My API",
-"version": "1.0.0",
-"description": "Email sending API"
-},
-"servers": [
-{
-"url": "http://localhost:8787/api"
-}
-],
-"components": {
-"securitySchemes": {
-"x-api-key": {
-"type": "apiKey",
-"in": "header",
-"name": "x-api-key",
-"description": "API key for authentication"
-}
-},
-"schemas": {
-"Headers": {
-"type": "object",
-"additionalProperties": {
-"type": "string",
-"description": "Value of the custom header."
-},
-"description": "Custom email headers as key-value pairs."
-},
-"Tags": {
-"type": "object",
-"properties": {
-"name": {
-"type": "string",
-"minLength": 1,
-"description": "Name of the tag."
-},
-"value": {
-"type": "string",
-"minLength": 1,
-"description": "Value of the tag."
-}
-},
-"required": [
-"name",
-"value"
-],
-"description": "Optional tag for categorization"
-},
-"Attachments": {
-"type": "array",
-"items": {
-"type": "object",
-"properties": {
-"filename": {
-"type": "string",
-"minLength": 1,
-"description": "Name of the attachment file."
-},
-"content": {
-"type": "string",
-"minLength": 1,
-"format": "binary",
-"description": "Content of the attachment."
-},
-"path": {
-"type": "string",
-"description": "Path to where the attachment is hosted. If provided, the content will be fetched from this URL."
-},
-"content_type": {
-"type": "string",
-"pattern": "^[\\w.-]+\\/[\\w.+-]+$",
-"description": "MIME type of the attachment file. If not provided, it will be inferred from the filename."
-}
-},
-"required": [
-"filename",
-"content"
-]
-},
-"description": "List of files to be attached to the email."
-},
-"Records": {
-"type": "object",
-"properties": {
-"record": {
-"type": "string",
-"description": "Type of DNS record",
-"example": "SPF"
-},
-"name": {
-"type": "string",
-"description": "Name of the DNS record. For example, the subdomain or domain name",
-"example": "example.com"
-},
-"type": {
-"type": "string",
-"description": "Type of DNS record. For example, A, CNAME, TXT, or MX",
-"example": "MX"
-},
-"ttl": {
-"type": "string",
-"description": "Time to live for the DNS record, e.g., \"Auto\" or a specific duration",
-"example": "Auto"
-},
-"status": {
-"type": "string",
-"description": "Current status of the DNS record verification",
-"example": "not_started"
-},
-"value": {
-"type": "string",
-"description": "Value of the DNS record, such as the mail server address",
-"example": "feedback-smtp.us-east-1.amazonses.com"
-},
-"priority": {
-"type": "number",
-"description": "Priority of the DNS record, relevant for MX records",
-"example": 10
-}
-},
-"required": [
-"record",
-"name",
-"type",
-"ttl",
-"status",
-"value"
-],
-"description": "List of DNS records associated with the domain"
-}
-},
-"parameters": {}
-},
-"paths": {
-"/emails": {
-"post": {
-"summary": "Send an email",
-"description": "Send an email with the specified parameters",
-"security": [
-{
-"x-api-key": []
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"from": {
-"type": "string",
-"description": "Sender email address. Must be in the format \"Your Name &lt;sender@domain.com&gt;\"."
-},
-"to": {
-"anyOf": [
-{
-"type": "string",
-"format": "email"
-},
-{
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"minItems": 1
-}
-],
-"description": "Recipient(s) of the email. For multiple recipients, use an array. Max 50 recipients.",
-"maxItems": 50
-},
-"cc": {
-"anyOf": [
-{
-"type": "string",
-"format": "email"
-},
-{
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"minItems": 1
-}
-],
-"description": "Carbon copy recipients. For multiple recipients, use an array. "
-},
-"bcc": {
-"anyOf": [
-{
-"type": "string",
-"format": "email"
-},
-{
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"minItems": 1
-}
-],
-"description": "Blind carbon copy recipients. For multiple recipients, use an array."
-},
-"reply_to": {
-"anyOf": [
-{
-"type": "string",
-"format": "email"
-},
-{
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"minItems": 1
-}
-],
-"description": "Reply-To address(es). For multiple recipients, use an array."
-},
-"subject": {
-"type": "string",
-"minLength": 1,
-"description": "Email subject line. Must be at least 1 character."
-},
-"preview_text": {
-"type": "string",
-"description": "Short preview text for email clients."
-},
-"html": {
-"type": "string",
-"description": "HTML content of the email. Must be valid HTML."
-},
-"text": {
-"type": "string",
-"minLength": 1,
-"description": "Plain text content of the email."
-},
-"headers": {
-"$ref": "#/components/schemas/Headers"
-},
-"scheduled_at": {
-"type": "string",
-"format": "date-time",
-"description": "Send time in ISO 8601 format. If not provided, email is sent immediately."
-},
-"in_reply_id": {
-"type": "string",
-"description": "Message-ID this email is replying to."
-},
-"tags": {
-"$ref": "#/components/schemas/Tags"
-},
-"attachments": {
-"$ref": "#/components/schemas/Attachments"
-}
-},
-"required": [
-"from",
-"to",
-"subject",
-"headers"
-]
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Create a new email",
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "Unique identifier for the email"
-}
-},
-"required": [
-"id"
-]
-}
-}
-}
-}
-}
-}
-},
-"/emails/{id}": {
-"get": {
-"description": "Get an email by ID",
-"summary": "Retrieve an email by its unique identifier",
-"security": [
-{
-"x-api-key": []
-}
-],
-"parameters": [
-{
-"schema": {
-"type": "string"
-},
-"required": true,
-"in": "path",
-"description": "The unique identifier for the email",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9",
-"name": "id"
-}
-],
-"responses": {
-"200": {
-"description": "Retrieve an email by ID",
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "Unique identifier for the email",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
-},
-"to": {
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"description": "Recipient email addresses",
-"example": [
-"recipient@strimmel.com"
-]
-},
-"from": {
-"type": "string",
-"description": "Sender email address",
-"example": "Acme Corp <corp@strimmel.com>"
-},
-"subject": {
-"type": "string",
-"description": "Email subject line",
-"example": "Hello from Strimmel!"
-},
-"html": {
-"type": "string",
-"nullable": true,
-"description": "HTML content of the email",
-"example": "<p>This is the HTML content of the email.</p>"
-},
-"text": {
-"type": "string",
-"nullable": true,
-"description": "Plain text content of the email",
-"example": "This is the plain text content of the email."
-},
-"created_at": {
-"type": "string",
-"format": "date-time",
-"description": "Email creation timestamp in ISO 8601 format",
-"example": "2023-04-03T22:13:42.674981+00:00"
-},
-"scheduled_at": {
-"type": "string",
-"nullable": true,
-"format": "date-time",
-"description": "Scheduled send time in ISO 8601 format",
-"example": "2025-08-02T10:00:00Z"
-},
-"status": {
-"type": "string",
-"description": "Current status of the email",
-"example": "delivered"
-},
-"reply_to": {
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"description": "Reply-To email addresses",
-"example": [
-"reply@example.com"
-]
-},
-"preview_text": {
-"type": "string",
-"nullable": true,
-"description": "Short preview text for email clients",
-"example": "Thank you for your order! Here’s what you purchased..."
-},
-"bcc": {
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"description": "Blind carbon copy recipients",
-"example": [
-"bcc@example.com"
-]
-},
-"cc": {
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"description": "Carbon copy recipients",
-"example": [
-"cc@example.com"
-]
-},
-"in_reply_id": {
-"type": "string",
-"nullable": true,
-"description": "Message-ID this email is replying to",
-"example": "aaab4754-1d3b-41d5-a9ed-2ffa88d6ac0f"
-}
-},
-"required": [
-"id",
-"to",
-"from",
-"subject",
-"html",
-"text",
-"created_at",
-"scheduled_at",
-"status",
-"reply_to",
-"preview_text",
-"bcc",
-"cc",
-"in_reply_id"
-]
-}
-}
-}
-}
-}
-},
-"patch": {
-"description": "Update the scheduled send time of an email",
-"security": [
-{
-"x-api-key": []
-}
-],
-"summary": "Update the scheduled send time of an email",
-"parameters": [
-{
-"schema": {
-"type": "string"
-},
-"required": true,
-"in": "path",
-"description": "The unique identifier for the email",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9",
-"name": "id"
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"scheduled_at": {
-"type": "string",
-"format": "date-time",
-"description": "Scheduled send time in ISO 8601 format",
-"example": "2025-08-02T10:00:00Z"
-}
-},
-"required": [
-"scheduled_at"
-]
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Email rescheduled successfully. Returns the email ID.",
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "The unique identifier for the email",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
-}
-},
-"required": [
-"id"
-]
-}
-}
-}
-}
-}
-}
-},
-"/emails/cancel": {
-"post": {
-"description": "Cancel a scheduled email",
-"summary": "Cancel a scheduled email",
-"security": [
-{
-"x-api-key": []
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "The unique identifier for the email to cancel",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
-}
-},
-"required": [
-"id"
-]
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Create a new email",
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "The unique identifier for the email",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
-}
-},
-"required": [
-"id"
-]
-}
-}
-}
-}
-}
-}
-},
-"/emails/batch": {
-"post": {
-"summary": "Send a batch of emails",
-"security": [
-{
-"x-api-key": []
-}
-],
-"description": "Send a batch of emails with the specified parameters",
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"type": "array",
-"items": {
-"type": "object",
-"properties": {
-"from": {
-"type": "string",
-"description": "Sender email address. Must be in the format \"Your Name <sender@domain.com>\"."
-},
-"to": {
-"anyOf": [
-{
-"type": "string",
-"format": "email"
-},
-{
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"minItems": 1
-}
-],
-"description": "Recipient(s) of the email. For multiple recipients, use an array. Max 50 recipients.",
-"maxItems": 50
-},
-"cc": {
-"anyOf": [
-{
-"type": "string",
-"format": "email"
-},
-{
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"minItems": 1
-}
-],
-"description": "Carbon copy recipients. For multiple recipients, use an array. "
-},
-"bcc": {
-"anyOf": [
-{
-"type": "string",
-"format": "email"
-},
-{
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"minItems": 1
-}
-],
-"description": "Blind carbon copy recipients. For multiple recipients, use an array."
-},
-"reply_to": {
-"anyOf": [
-{
-"type": "string",
-"format": "email"
-},
-{
-"type": "array",
-"items": {
-"type": "string",
-"format": "email"
-},
-"minItems": 1
-}
-],
-"description": "Reply-To address(es). For multiple recipients, use an array."
-},
-"subject": {
-"type": "string",
-"minLength": 1,
-"description": "Email subject line. Must be at least 1 character."
-},
-"preview_text": {
-"type": "string",
-"description": "Short preview text for email clients."
-},
-"html": {
-"type": "string",
-"description": "HTML content of the email. Must be valid HTML."
-},
-"text": {
-"type": "string",
-"minLength": 1,
-"description": "Plain text content of the email."
-},
-"headers": {
-"allOf": [
-{
-"$ref": "#/components/schemas/Headers"
-},
-{
-"additionalProperties": {
-"type": "string",
-"description": "Value for the custom email header."
-}
-}
-]
-},
-"scheduled_at": {
-"type": "string",
-"format": "date-time",
-"description": "Send time in ISO 8601 format. If not provided, email is sent immediately."
-},
-"in_reply_id": {
-"type": "string",
-"description": "Message-ID this email is replying to."
-}
-},
-"required": [
-"from",
-"to",
-"subject",
-"headers"
-]
-},
-"minItems": 1,
-"maxItems": 100
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Batch of emails sent successfully. Returns an array of email IDs.",
-"content": {
-"application/json": {
-"schema": {
-"type": "array",
-"items": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "Unique identifier for the email"
-}
-},
-"required": [
-"id"
-]
-}
-}
-}
-}
-}
-}
-}
-},
-"/domains": {
-"post": {
-"summary": "Create a new domain",
-"description": "Create a new domain with the specified parameters",
-"security": [
-{
-"x-api-key": []
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"region": {
-"type": "string",
-"enum": [
-"us-east-1",
-"us-west-2",
-"eu-west-1"
-],
-"description": "The region where the email will be sent from.",
-"example": "us-east-1"
-},
-"name": {
-"type": "string",
-"minLength": 1,
-"description": "The domain name to be created",
-"example": "example.com"
-},
-"custom_return_path": {
-"type": "string",
-"default": "send",
-"description": "Custom return path label used in Return-Path for SPF, DMARC, and bounce handling (e.g., \"send\" → send.example.com). Avoid using test/demo names.",
-"example": "send"
-}
-},
-"required": [
-"region",
-"name"
-]
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Create a new domain",
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "Unique identifier for the created domain",
-"example": "1596ac32-766f-4df6-858a-f9b364d0c26d"
-},
-"name": {
-"type": "string",
-"description": "The name of the created domain",
-"example": "example.com"
-},
-"region": {
-"type": "string",
-"description": "The region where the email will be sent from.",
-"example": "us-east-1"
-},
-"created_at": {
-"type": "string",
-"format": "date-time",
-"description": "The timestamp when the domain was created",
-"example": "2023-10-01T12:00:00Z"
-},
-"status": {
-"type": "string",
-"enum": [
-"failed",
-"success",
-"not-started",
-"pending",
-"temporary-failure"
-],
-"description": "The current status of the domain",
-"example": "pending"
-},
-"records": {
-"type": "array",
-"items": {
-"$ref": "#/components/schemas/Records"
-}
-}
-},
-"required": [
-"id",
-"name",
-"region",
-"created_at",
-"status",
-"records"
-]
-}
-}
-}
-}
-}
-},
-"get": {
-"description": "Get domains available for the team.",
-"summary": "Retrieve a list of domains for the team",
-"security": [
-{
-"x-api-key": []
-}
-],
-"responses": {
-"200": {
-"description": "Retrieve a list of domains for the team. Returns an array of domains with their details.",
-"content": {
-"application/json": {
-"schema": {
-"type": "array",
-"items": {
-"type": "object",
-"properties": {
-"created_at": {
-"type": "string",
-"format": "date-time",
-"description": "The timestamp when the domain was created",
-"example": "2023-10-01T12:00:00Z"
-},
-"id": {
-"type": "string",
-"description": "Unique identifier for the domain",
-"example": "1596ac32-766f-4df6-858a-f9b364d0c26d"
-},
-"name": {
-"type": "string",
-"description": "The name of the domain",
-"example": "example.com"
-},
-"region": {
-"type": "string",
-"description": "The region where the email will be sent from.",
-"example": "us-east-1"
-},
-"status": {
-"type": "string",
-"enum": [
-"failed",
-"success",
-"not-started",
-"pending",
-"temporary-failure"
-],
-"description": "The current status of the domain",
-"example": "pending"
-}
-},
-"required": [
-"created_at",
-"id",
-"name",
-"region",
-"status"
-]
-}
-}
-}
-}
-}
-}
-}
-},
-"/domains/{id}": {
-"patch": {
-"description": "Update a domain by ID",
-"summary": "Modify the details of a domain.",
-"security": [
-{
-"x-api-key": []
-}
-],
-"parameters": [
-{
-"schema": {
-"type": "string"
-},
-"required": true,
-"in": "path",
-"description": "The unique identifier for the domain",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9",
-"name": "id"
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"click_tracking": {
-"type": "boolean",
-"description": "Track clicks within the body of each HTML email. ",
-"example": true
-},
-"open_tracking": {
-"type": "boolean",
-"description": "Track opens within the body of each HTML email.",
-"example": true
-},
-"tls": {
-"type": "string",
-"enum": [
-"optional",
-"require"
-],
-"description": "Enable TLS for the domain.",
-"example": "optional"
-}
-}
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Domain updated successfully. Returns the domain ID.",
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "The unique identifier for the domain",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
-}
-},
-"required": [
-"id"
-]
-}
-}
-}
-}
-}
-},
-"get": {
-"description": "Get a domain by ID",
-"summary": "Retrieve a domain by its unique identifier",
-"security": [
-{
-"x-api-key": []
-}
-],
-"parameters": [
-{
-"schema": {
-"type": "string"
-},
-"required": true,
-"in": "path",
-"description": "The unique identifier for the domain",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9",
-"name": "id"
-}
-],
-"responses": {
-"200": {
-"description": "Retrieve a domain by ID",
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "Unique identifier for the created domain",
-"example": "1596ac32-766f-4df6-858a-f9b364d0c26d"
-},
-"name": {
-"type": "string",
-"description": "The name of the created domain",
-"example": "example.com"
-},
-"region": {
-"type": "string",
-"description": "The region where the email will be sent from.",
-"example": "us-east-1"
-},
-"created_at": {
-"type": "string",
-"format": "date-time",
-"description": "The timestamp when the domain was created",
-"example": "2023-10-01T12:00:00Z"
-},
-"status": {
-"type": "string",
-"enum": [
-"failed",
-"success",
-"not-started",
-"pending",
-"temporary-failure"
-],
-"description": "The current status of the domain",
-"example": "pending"
-},
-"records": {
-"type": "array",
-"items": {
-"$ref": "#/components/schemas/Records"
-}
-}
-},
-"required": [
-"id",
-"name",
-"region",
-"created_at",
-"status",
-"records"
-]
-}
-}
-}
-}
-}
-},
-"delete": {
-"description": "Delete a domain by ID.",
-"summary": "Remove a domain from the team",
-"security": [
-{
-"x-api-key": []
-}
-],
-"parameters": [
-{
-"schema": {
-"type": "string",
-"description": "The unique identifier for the domain",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
-},
-"required": true,
-"description": "The unique identifier for the domain",
-"name": "id",
-"in": "path"
-}
-],
-"responses": {
-"200": {
-"description": "Indicates if the domain was successfully deleted.",
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"id": {
-"type": "string",
-"description": "The unique identifier for the deleted domain",
-"example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
-}
-},
-"required": [
-"id"
-]
-}
-}
-}
-}
-}
-}
-}
-}
+  "openapi": "3.1.0",
+  "info": {
+    "title": "My API",
+    "version": "1.0.0",
+    "description": "Email sending API"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8787/api"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "x-api-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "API key for authentication"
+      }
+    },
+    "schemas": {
+      "Headers": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "description": "Value of the custom header."
+        },
+        "description": "Custom email headers as key-value pairs."
+      },
+      "Tags": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the tag."
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Value of the tag."
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
+        "description": "Optional tag for categorization"
+      },
+      "Attachments": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Name of the attachment file."
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "format": "binary",
+              "description": "Content of the attachment."
+            },
+            "path": {
+              "type": "string",
+              "description": "Path to where the attachment is hosted. If provided, the content will be fetched from this URL."
+            },
+            "content_type": {
+              "type": "string",
+              "pattern": "^[\\w.-]+\\/[\\w.+-]+$",
+              "description": "MIME type of the attachment file. If not provided, it will be inferred from the filename."
+            }
+          },
+          "required": [
+            "filename",
+            "content"
+          ]
+        },
+        "description": "List of files to be attached to the email."
+      },
+      "Records": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "type": "string",
+            "description": "Type of DNS record",
+            "example": "SPF"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the DNS record. For example, the subdomain or domain name",
+            "example": "example.com"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of DNS record. For example, A, CNAME, TXT, or MX",
+            "example": "MX"
+          },
+          "ttl": {
+            "type": "string",
+            "description": "Time to live for the DNS record, e.g., \"Auto\" or a specific duration",
+            "example": "Auto"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the DNS record verification",
+            "example": "not_started"
+          },
+          "value": {
+            "type": "string",
+            "description": "Value of the DNS record, such as the mail server address",
+            "example": "feedback-smtp.us-east-1.amazonses.com"
+          },
+          "priority": {
+            "type": "number",
+            "description": "Priority of the DNS record, relevant for MX records",
+            "example": 10
+          }
+        },
+        "required": [
+          "record",
+          "name",
+          "type",
+          "ttl",
+          "status",
+          "value"
+        ],
+        "description": "List of DNS records associated with the domain"
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/emails": {
+      "post": {
+        "summary": "Send an email",
+        "description": "Send an email with the specified parameters",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "description": "Sender email address. Must be in the format \"Your Name &lt;sender@domain.com&gt;\"."
+                  },
+                  "to": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "minItems": 1
+                      }
+                    ],
+                    "description": "Recipient(s) of the email. For multiple recipients, use an array. Max 50 recipients.",
+                    "maxItems": 50
+                  },
+                  "cc": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "minItems": 1
+                      }
+                    ],
+                    "description": "Carbon copy recipients. For multiple recipients, use an array. "
+                  },
+                  "bcc": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "minItems": 1
+                      }
+                    ],
+                    "description": "Blind carbon copy recipients. For multiple recipients, use an array."
+                  },
+                  "reply_to": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "minItems": 1
+                      }
+                    ],
+                    "description": "Reply-To address(es). For multiple recipients, use an array."
+                  },
+                  "subject": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Email subject line. Must be at least 1 character."
+                  },
+                  "preview_text": {
+                    "type": "string",
+                    "description": "Short preview text for email clients."
+                  },
+                  "html": {
+                    "type": "string",
+                    "description": "HTML content of the email. Must be valid HTML."
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Plain text content of the email."
+                  },
+                  "headers": {
+                    "$ref": "#/components/schemas/Headers"
+                  },
+                  "scheduled_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Send time in ISO 8601 format. If not provided, email is sent immediately."
+                  },
+                  "in_reply_id": {
+                    "type": "string",
+                    "description": "Message-ID this email is replying to."
+                  },
+                  "tags": {
+                    "$ref": "#/components/schemas/Tags"
+                  },
+                  "attachments": {
+                    "$ref": "#/components/schemas/Attachments"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "subject",
+                  "headers"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create a new email",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique identifier for the email"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/emails/{id}": {
+      "get": {
+        "description": "Get an email by ID",
+        "summary": "Retrieve an email by its unique identifier",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier for the email",
+            "example": "16ef91ab-56de-4452-b3ef-907902dec9f9",
+            "name": "id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieve an email by ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique identifier for the email",
+                      "example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
+                    },
+                    "to": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "description": "Recipient email addresses",
+                      "example": [
+                        "recipient@strimmel.com"
+                      ]
+                    },
+                    "from": {
+                      "type": "string",
+                      "description": "Sender email address",
+                      "example": "Acme Corp <corp@strimmel.com>"
+                    },
+                    "subject": {
+                      "type": "string",
+                      "description": "Email subject line",
+                      "example": "Hello from Strimmel!"
+                    },
+                    "html": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "HTML content of the email",
+                      "example": "<p>This is the HTML content of the email.</p>"
+                    },
+                    "text": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Plain text content of the email",
+                      "example": "This is the plain text content of the email."
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Email creation timestamp in ISO 8601 format",
+                      "example": "2023-04-03T22:13:42.674981+00:00"
+                    },
+                    "scheduled_at": {
+                      "type": "string",
+                      "nullable": true,
+                      "format": "date-time",
+                      "description": "Scheduled send time in ISO 8601 format",
+                      "example": "2025-08-02T10:00:00Z"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Current status of the email",
+                      "example": "delivered"
+                    },
+                    "reply_to": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "description": "Reply-To email addresses",
+                      "example": [
+                        "reply@example.com"
+                      ]
+                    },
+                    "preview_text": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Short preview text for email clients",
+                      "example": "Thank you for your order! Here’s what you purchased..."
+                    },
+                    "bcc": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "description": "Blind carbon copy recipients",
+                      "example": [
+                        "bcc@example.com"
+                      ]
+                    },
+                    "cc": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "description": "Carbon copy recipients",
+                      "example": [
+                        "cc@example.com"
+                      ]
+                    },
+                    "in_reply_id": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Message-ID this email is replying to",
+                      "example": "aaab4754-1d3b-41d5-a9ed-2ffa88d6ac0f"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "to",
+                    "from",
+                    "subject",
+                    "html",
+                    "text",
+                    "created_at",
+                    "scheduled_at",
+                    "status",
+                    "reply_to",
+                    "preview_text",
+                    "bcc",
+                    "cc",
+                    "in_reply_id"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Update the scheduled send time of an email",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Update the scheduled send time of an email",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier for the email",
+            "example": "16ef91ab-56de-4452-b3ef-907902dec9f9",
+            "name": "id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "scheduled_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Scheduled send time in ISO 8601 format",
+                    "example": "2025-08-02T10:00:00Z"
+                  }
+                },
+                "required": [
+                  "scheduled_at"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email rescheduled successfully. Returns the email ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for the email",
+                      "example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/emails/cancel": {
+      "post": {
+        "description": "Cancel a scheduled email",
+        "summary": "Cancel a scheduled email",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The unique identifier for the email to cancel",
+                    "example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create a new email",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for the email",
+                      "example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/emails/batch": {
+      "post": {
+        "summary": "Send a batch of emails",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "description": "Send a batch of emails with the specified parameters",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "description": "Sender email address. Must be in the format \"Your Name <sender@domain.com>\"."
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "minItems": 1
+                        }
+                      ],
+                      "description": "Recipient(s) of the email. For multiple recipients, use an array. Max 50 recipients.",
+                      "maxItems": 50
+                    },
+                    "cc": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "minItems": 1
+                        }
+                      ],
+                      "description": "Carbon copy recipients. For multiple recipients, use an array. "
+                    },
+                    "bcc": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "minItems": 1
+                        }
+                      ],
+                      "description": "Blind carbon copy recipients. For multiple recipients, use an array."
+                    },
+                    "reply_to": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "minItems": 1
+                        }
+                      ],
+                      "description": "Reply-To address(es). For multiple recipients, use an array."
+                    },
+                    "subject": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Email subject line. Must be at least 1 character."
+                    },
+                    "preview_text": {
+                      "type": "string",
+                      "description": "Short preview text for email clients."
+                    },
+                    "html": {
+                      "type": "string",
+                      "description": "HTML content of the email. Must be valid HTML."
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Plain text content of the email."
+                    },
+                    "headers": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/Headers"
+                        },
+                        {
+                          "additionalProperties": {
+                            "type": "string",
+                            "description": "Value for the custom email header."
+                          }
+                        }
+                      ]
+                    },
+                    "scheduled_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Send time in ISO 8601 format. If not provided, email is sent immediately."
+                    },
+                    "in_reply_id": {
+                      "type": "string",
+                      "description": "Message-ID this email is replying to."
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "subject",
+                    "headers"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 100
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch of emails sent successfully. Returns an array of email IDs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Unique identifier for the email"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/domains": {
+      "post": {
+        "summary": "Create a new domain",
+        "description": "Create a new domain with the specified parameters",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "region": {
+                    "type": "string",
+                    "enum": [
+                      "us-east-1",
+                      "us-west-2",
+                      "eu-west-1"
+                    ],
+                    "description": "The region where the email will be sent from.",
+                    "example": "us-east-1"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "The domain name to be created",
+                    "example": "example.com"
+                  },
+                  "custom_return_path": {
+                    "type": "string",
+                    "default": "send",
+                    "description": "Custom return path label used in Return-Path for SPF, DMARC, and bounce handling (e.g., \"send\" → send.example.com). Avoid using test/demo names.",
+                    "example": "send"
+                  }
+                },
+                "required": [
+                  "region",
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create a new domain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique identifier for the created domain",
+                      "example": "1596ac32-766f-4df6-858a-f9b364d0c26d"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the created domain",
+                      "example": "example.com"
+                    },
+                    "region": {
+                      "type": "string",
+                      "description": "The region where the email will be sent from.",
+                      "example": "us-east-1"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The timestamp when the domain was created",
+                      "example": "2023-10-01T12:00:00Z"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "failed",
+                        "success",
+                        "not-started",
+                        "pending",
+                        "temporary-failure"
+                      ],
+                      "description": "The current status of the domain",
+                      "example": "pending"
+                    },
+                    "records": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Records"
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "region",
+                    "created_at",
+                    "status",
+                    "records"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Get domains available for the team.",
+        "summary": "Retrieve a list of domains for the team",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieve a list of domains for the team. Returns an array of domains with their details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The timestamp when the domain was created",
+                        "example": "2023-10-01T12:00:00Z"
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "Unique identifier for the domain",
+                        "example": "1596ac32-766f-4df6-858a-f9b364d0c26d"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the domain",
+                        "example": "example.com"
+                      },
+                      "region": {
+                        "type": "string",
+                        "description": "The region where the email will be sent from.",
+                        "example": "us-east-1"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "failed",
+                          "success",
+                          "not-started",
+                          "pending",
+                          "temporary-failure"
+                        ],
+                        "description": "The current status of the domain",
+                        "example": "pending"
+                      }
+                    },
+                    "required": [
+                      "created_at",
+                      "id",
+                      "name",
+                      "region",
+                      "status"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/domains/{id}": {
+      "patch": {
+        "description": "Update a domain by ID",
+        "summary": "Modify the details of a domain.",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier for the domain",
+            "example": "16ef91ab-56de-4452-b3ef-907902dec9f9",
+            "name": "id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "click_tracking": {
+                    "type": "boolean",
+                    "description": "Track clicks within the body of each HTML email. ",
+                    "example": true
+                  },
+                  "open_tracking": {
+                    "type": "boolean",
+                    "description": "Track opens within the body of each HTML email.",
+                    "example": true
+                  },
+                  "tls": {
+                    "type": "string",
+                    "enum": [
+                      "optional",
+                      "require"
+                    ],
+                    "description": "Enable TLS for the domain.",
+                    "example": "optional"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Domain updated successfully. Returns the domain ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for the domain",
+                      "example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Get a domain by ID",
+        "summary": "Retrieve a domain by its unique identifier",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "in": "path",
+            "description": "The unique identifier for the domain",
+            "example": "16ef91ab-56de-4452-b3ef-907902dec9f9",
+            "name": "id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieve a domain by ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique identifier for the created domain",
+                      "example": "1596ac32-766f-4df6-858a-f9b364d0c26d"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the created domain",
+                      "example": "example.com"
+                    },
+                    "region": {
+                      "type": "string",
+                      "description": "The region where the email will be sent from.",
+                      "example": "us-east-1"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The timestamp when the domain was created",
+                      "example": "2023-10-01T12:00:00Z"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "failed",
+                        "success",
+                        "not-started",
+                        "pending",
+                        "temporary-failure"
+                      ],
+                      "description": "The current status of the domain",
+                      "example": "pending"
+                    },
+                    "records": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Records"
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "region",
+                    "created_at",
+                    "status",
+                    "records"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a domain by ID.",
+        "summary": "Remove a domain from the team",
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "The unique identifier for the domain",
+              "example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
+            },
+            "required": true,
+            "description": "The unique identifier for the domain",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates if the domain was successfully deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for the deleted domain",
+                      "example": "16ef91ab-56de-4452-b3ef-907902dec9f9"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
